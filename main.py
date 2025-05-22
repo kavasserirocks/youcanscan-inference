@@ -9,7 +9,18 @@ from torchvision import transforms
 from PIL import Image
 import timm
 
+
+#imports for chat 
+from dotenv import load_dotenv
+import os
+
+from routes import chat
+load_dotenv() 
+
+
 app = FastAPI()
+# Include the chat router
+app.include_router(chat.router)
 
 app.add_middleware(
     CORSMiddleware,

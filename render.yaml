@@ -1,7 +1,16 @@
-# --- requirements.txt ---
-fastapi
-uvicorn
-pillow
-torch
-torchvision
-timm
+# --- render.yaml ---
+services:
+  - type: web
+    name: youcanscan-inference
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port 10000"
+    plan: free
+    envVars:
+      - key: MODEL_PATH
+        value: best_model_pades_transfer.pt
+
+# Note:
+# - Place `best_model_pades_transfer.pt` in this folder before pushing
+# - You can `git init` and push this folder directly to GitHub and link to Render
+# - You can test locally with `uvicorn main:app --reload`

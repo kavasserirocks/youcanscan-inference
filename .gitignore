@@ -13,3 +13,5 @@ venv/
 
 # Model files (if you later move large files elsewhere)
 *.pt
+
+.env
