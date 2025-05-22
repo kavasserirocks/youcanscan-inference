@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from openai import OpenAI
+from typing import List, Literal
 import os
 
 router = APIRouter()
@@ -8,9 +9,12 @@ router = APIRouter()
 # Instantiate the new OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-class ChatRequest(BaseModel):
-    messages: list[dict]  # expects [{"role": "user", "content": "..."}, ...]
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant", "system"]
+    content: str
 
+class ChatRequest(BaseModel):
+    messages: List[ChatMessage]
 
 class ChatResponse(BaseModel):
     reply: str
