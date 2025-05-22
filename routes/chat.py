@@ -9,7 +9,8 @@ router = APIRouter()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class ChatRequest(BaseModel):
-    message: str
+    messages: list[dict]  # expects [{"role": "user", "content": "..."}, ...]
+
 
 class ChatResponse(BaseModel):
     reply: str
