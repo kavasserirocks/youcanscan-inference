@@ -17,10 +17,15 @@ import os
 from routes import chat
 load_dotenv() 
 
+from routes import sync
+
+
+
 
 app = FastAPI()
 # Include the chat router
 app.include_router(chat.router)
+app.include_router(sync.router)
 
 app.add_middleware(
     CORSMiddleware,
