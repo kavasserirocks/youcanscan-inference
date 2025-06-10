@@ -18,14 +18,17 @@ from routes import chat
 load_dotenv() 
 
 from routes import sync
+from routes import risk  # Import the risk router
 
 
 
 
 app = FastAPI()
-# Include the chat router
+# Include the routers
 app.include_router(chat.router)
 app.include_router(sync.router)
+app.include_router(risk.router)
+
 
 app.add_middleware(
     CORSMiddleware,
