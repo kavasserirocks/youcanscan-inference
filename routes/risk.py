@@ -1,12 +1,30 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
+from typing import Optional
 import math
 
 router = APIRouter()
 
 INTERCEPT = -6.0
-COEFFICIENTS = { ... }  # same as before
+COEFFICIENTS = {
+    "age": 0.04,
+    "sex_female": 0.5,
+    "hair_red": 1.25,
+    "sunburns_4+": 0.74,
+    "burns_easily": 0.69,
+    "moles": 1.10,
+    "freckles_many": 0.64,
+    "family_history": 0.83,
+    "outdoor_activity": 0.6
+}
 BASELINE_5YR_RISK = 0.003
+RACE_MULTIPLIER = {
+    "white": 1.0,
+    "black": 0.2,
+    "asian": 0.3,
+    "hispanic": 0.5,
+    "other": 0.6
+}
 
 class RiskInput(BaseModel):
     user_id: str
@@ -19,6 +37,7 @@ class RiskInput(BaseModel):
     freckles: str
     family_history: bool
     outdoor_activity: str
+    race: Optional[str] = None
 
 def compute_risk(input: RiskInput):
     logit = INTERCEPT
@@ -33,12 +52,23 @@ def compute_risk(input: RiskInput):
     logit += COEFFICIENTS["outdoor_activity"] if input.outdoor_activity == "mostly_outdoors" else 0
 
     relative_risk = 1 / (1 + math.exp(-logit))
-    absolute_risk = relative_risk * BASELINE_5YR_RISK
+
+    if input.race:
+        race_factor = RACE_MULTIPLIER.get(input.race.lower(), 1.0)
+        absolute_risk = relative_risk * BASELINE_5YR_RISK * race_factor
+    else:
+        absolute_risk = relative_risk * BASELINE_5YR_RISK
+
     return relative_risk, absolute_risk
 
 @router.post("/calculate-risk")
 def calculate_risk(input: RiskInput):
     rel_risk, abs_risk = compute_risk(input)
+
+    message = None
+    if input.race is None:
+        message = "Note: Race was not specified. Results are based on population-average melanoma incidence."
+
     return {
         "relative_risk": rel_risk,
         "absolute_5yr_risk": abs_risk,
@@ -46,5 +76,6 @@ def calculate_risk(input: RiskInput):
             "Low" if abs_risk < 0.001 else
             "Moderate" if abs_risk < 0.005 else
             "High"
-        )
+        ),
+        "message": message
     }
